@@ -2,9 +2,11 @@ import React, { useState } from "react";
 
 import MoviesList from "./components/MoviesList";
 import "./App.css";
+import LoadingApp from "./components/LoadingApp";
 
 function App() {
   const [moviesData, setMoviesData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // const moviesDataHandler = () => {
   //   fetch("https://swapi.dev/api/films")
@@ -24,9 +26,10 @@ function App() {
   //     });
   // };
 
-
-  // promises handled by async and await //
+  /* promises handled by async and await */
   const moviesDataHandler = async () => {
+    setIsLoading(true);
+
     const response = await fetch("https://swapi.dev/api/films");
 
     const jsonResponse = await response.json();
@@ -41,6 +44,8 @@ function App() {
     });
 
     setMoviesData(transformedMovies);
+    setIsLoading(false);
+
   };
 
   return (
@@ -49,7 +54,10 @@ function App() {
         <button onClick={() => moviesDataHandler()}>Fetch Movies</button>
       </section>
       <section>
-        <MoviesList movies={moviesData} />
+        {!isLoading && moviesData.length > 0 && <MoviesList movies={moviesData} />}
+        {!isLoading && moviesData.length === 0 && <p>No data found</p>}
+
+        {isLoading && <LoadingApp/>}
       </section>
     </React.Fragment>
   );

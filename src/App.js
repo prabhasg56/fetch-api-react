@@ -7,6 +7,7 @@ import LoadingApp from "./components/LoadingApp";
 function App() {
   const [moviesData, setMoviesData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // const moviesDataHandler = () => {
   //   fetch("https://swapi.dev/api/films")
@@ -30,20 +31,27 @@ function App() {
   const moviesDataHandler = async () => {
     setIsLoading(true);
 
-    const response = await fetch("https://swapi.dev/api/films");
+    try {
+      const response = await fetch("https://swapi.dev/api/films");
 
-    const jsonResponse = await response.json();
+      if (!response.OK) {
+        throw new Error("Something went wrong!");
+      }
+      const jsonResponse = await response.json();
 
-    const transformedMovies = jsonResponse.results.map((moviesData, ind) => {
-      return {
-        id: moviesData.episode_id,
-        title: moviesData.title,
-        openingText: moviesData.opening_crawl,
-        releaseDate: moviesData.release_date,
-      };
-    });
+      const transformedMovies = jsonResponse.results.map((moviesData, ind) => {
+        return {
+          id: moviesData.episode_id,
+          title: moviesData.title,
+          openingText: moviesData.opening_crawl,
+          releaseDate: moviesData.release_date,
+        };
+      });
 
-    setMoviesData(transformedMovies);
+      setMoviesData(transformedMovies);
+    } catch (error) {
+      setError(error);
+    }
     setIsLoading(false);
 
   };
@@ -54,10 +62,12 @@ function App() {
         <button onClick={() => moviesDataHandler()}>Fetch Movies</button>
       </section>
       <section>
-        {!isLoading && moviesData.length > 0 && <MoviesList movies={moviesData} />}
+        {!isLoading && moviesData.length > 0 && (
+          <MoviesList movies={moviesData} />
+        )}
         {!isLoading && moviesData.length === 0 && <p>No data found</p>}
 
-        {isLoading && <LoadingApp/>}
+        {isLoading && <LoadingApp />}
       </section>
     </React.Fragment>
   );

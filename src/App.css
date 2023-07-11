@@ -3,12 +3,12 @@ section {
   width: 90%;
   max-width: 40rem;
   text-align: center;
-  background-color: white;
+  background-color: aqua;
   padding: 2rem;
   border-radius: 12px;
 }
 
-button {
+.btn-fetch {
   font: inherit;
   cursor: pointer;
   background: #230052;
@@ -18,7 +18,7 @@ button {
   border-radius: 20px;
 }
 
-button:focus {
+.btn-fetch:focus {
   outline: none;
 }
 

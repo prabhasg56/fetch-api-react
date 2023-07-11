@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import MoviesList from "./components/MoviesList";
 import "./App.css";
 import LoadingApp from "./components/LoadingApp";
+import AddMovie from "./components/AddMovie";
 
 function App() {
   const [moviesData, setMoviesData] = useState([]);
@@ -29,7 +30,7 @@ function App() {
   // };
 
   /* promises handled by async and await */
-  const moviesDataHandler = useCallback( async () => {
+  const moviesDataHandler = useCallback( async (movie) => {
     setIsLoading(true);
     setError(null);
     
@@ -78,6 +79,9 @@ function App() {
 
   return (
     <React.Fragment>
+      <section>
+      <AddMovie movies={moviesDataHandler}/>
+      </section>
       <section>
         <button className="btn-fetch" onClick={() => moviesDataHandler()}>Fetch Movies</button>
       </section>

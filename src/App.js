@@ -9,7 +9,6 @@ function App() {
   const [moviesData, setMoviesData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [cancelError, setCancelError] = useState(false);
 
   // const moviesDataHandler = () => {
   //   fetch("https://swapi.dev/api/films")
@@ -30,7 +29,7 @@ function App() {
   // };
 
   /* promises handled by async and await */
-  const moviesDataHandler = useCallback( async (movie) => {
+  const moviesDataHandler = useCallback( async () => {
     setIsLoading(true);
     setError(null);
     
@@ -51,13 +50,18 @@ function App() {
           releaseDate: moviesData.release_date,
         };
       });
-
       setMoviesData(transformedMovies);
     } catch (error) {
       setError(error.message)
     }
     setIsLoading(false);
   },[]);
+
+  const addNewMovieHandler = (movie) => {
+    if(!isLoading){
+      setMoviesData([...moviesData, movie])
+    }
+  }
 
   useEffect(() => {
     moviesDataHandler();
@@ -80,7 +84,7 @@ function App() {
   return (
     <React.Fragment>
       <section>
-      <AddMovie movies={moviesDataHandler}/>
+      <AddMovie movies={addNewMovieHandler}/>
       </section>
       <section>
         <button className="btn-fetch" onClick={() => moviesDataHandler()}>Fetch Movies</button>

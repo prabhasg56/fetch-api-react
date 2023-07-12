@@ -34,23 +34,36 @@ function App() {
     setError(null);
     
     try {
-      const response = await fetch("https://swapi.dev/api/films");
+      // const response = await fetch("https://swapi.dev/api/films");// for fetching dummy movies data
+
+      const response = await fetch("https://react-http-6df08-default-rtdb.firebaseio.com/movies.json");
 
       if (!response.ok) {
         throw new Error("Something went wrong!");
       }
 
       const jsonResponse = await response.json();
+      const loadedMovies = [];
 
-      const transformedMovies = jsonResponse.results.map((moviesData, ind) => {
-        return {
-          id: moviesData.episode_id,
-          title: moviesData.title,
-          openingText: moviesData.opening_crawl,
-          releaseDate: moviesData.release_date,
-        };
-      });
-      setMoviesData(transformedMovies);
+      for(let key in jsonResponse) {
+        loadedMovies.push({
+          id: key,
+          title: jsonResponse[key].title,
+          openingText: jsonResponse[key].openingText,
+          releaseDate: jsonResponse[key].releaseDate,
+        })
+      }
+
+      // const transformedMovies = jsonResponse.results.map((moviesData, ind) => {
+      //   return {
+      //     id: moviesData.episode_id,
+      //     title: moviesData.title,
+      //     openingText: moviesData.opening_crawl,
+      //     releaseDate: moviesData.release_date,
+      //   };
+      // });
+
+      setMoviesData(loadedMovies);
     } catch (error) {
       setError(error.message)
     }
@@ -58,19 +71,35 @@ function App() {
   },[]);
 
   const addNewMovieHandler = (movie) => {
-    if(!isLoading){
-      setMoviesData([...moviesData, movie])
-    }
+    // if(!isLoading){
+    //   setMoviesData([...moviesData, movie])
+    // }
+
+    fetch("https://react-http-6df08-default-rtdb.firebaseio.com/movies.json", {
+      method:'POST',
+      body: JSON.stringify(movie),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+  }
+
+  const deleteMovie = async (id) => {
+     const response = await fetch(`https://react-http-6df08-default-rtdb.firebaseio.com/movies/${id}`, {
+        method: 'DELETE'
+      })
+
+     console.log(id)
   }
 
   useEffect(() => {
     moviesDataHandler();
-  },[]) // when component rerender useEffect gets call, and component rerendering happing, when the any state has update
+  },[moviesDataHandler]) // when component rerender useEffect gets call, and component rerendering happing, when the any state has update
 
   let contents = <p>No data found</p>
 
   if(moviesData.length > 0){
-    contents =  <MoviesList movies={moviesData} />
+    contents =  <MoviesList movies={moviesData} deleteMovie={deleteMovie} />
   }
 
   if(error){

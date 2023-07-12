@@ -29,14 +29,16 @@ function App() {
   // };
 
   /* promises handled by async and await */
-  const moviesDataHandler = useCallback( async () => {
+  const fetchMoviesDataHandler = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       // const response = await fetch("https://swapi.dev/api/films");// for fetching dummy movies data
 
-      const response = await fetch("https://react-http-6df08-default-rtdb.firebaseio.com/movies.json");
+      const response = await fetch(
+        "https://react-http-6df08-default-rtdb.firebaseio.com/movies.json"
+      );
 
       if (!response.ok) {
         throw new Error("Something went wrong!");
@@ -45,13 +47,13 @@ function App() {
       const jsonResponse = await response.json();
       const loadedMovies = [];
 
-      for(let key in jsonResponse) {
+      for (let key in jsonResponse) {
         loadedMovies.push({
           id: key,
           title: jsonResponse[key].title,
           openingText: jsonResponse[key].openingText,
           releaseDate: jsonResponse[key].releaseDate,
-        })
+        });
       }
 
       // const transformedMovies = jsonResponse.results.map((moviesData, ind) => {
@@ -65,64 +67,84 @@ function App() {
 
       setMoviesData(loadedMovies);
     } catch (error) {
-      setError(error.message)
+      setError(error.message);
     }
     setIsLoading(false);
-  },[]);
+  }, []);
 
-  const addNewMovieHandler = (movie) => {
+  const addNewMovieHandler = useCallback((movie) => {
     // if(!isLoading){
     //   setMoviesData([...moviesData, movie])
     // }
 
     fetch("https://react-http-6df08-default-rtdb.firebaseio.com/movies.json", {
-      method:'POST',
+      method: "POST",
       body: JSON.stringify(movie),
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
+      },
+    });
+  },[]);
+
+  const deleteMovie = useCallback(async (id) => {
+    console.log("deepsak");
+    try {
+      const response = await fetch(
+        `https://react-http-6df08-default-rtdb.firebaseio.com/movies/${id}.json`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if(!response.ok){
+        throw new Error('Somthing went wrong!');
       }
-    })
-  }
-
-  const deleteMovie = async (id) => {
-     const response = await fetch(`https://react-http-6df08-default-rtdb.firebaseio.com/movies/${id}`, {
-        method: 'DELETE'
-      })
-
-     console.log(id)
-  }
+    } catch (error) {
+      alert(error.message);
+    }
+  },[]);
 
   useEffect(() => {
-    moviesDataHandler();
-  },[moviesDataHandler]) // when component rerender useEffect gets call, and component rerendering happing, when the any state has update
+    fetchMoviesDataHandler();
+  }, [addNewMovieHandler, deleteMovie]); // when component rerender useEffect gets call, component rerendering happing, when the any state has update
 
-  let contents = <p>No data found</p>
+  let contents = <p>No data found</p>;
 
-  if(moviesData.length > 0){
-    contents =  <MoviesList movies={moviesData} deleteMovie={deleteMovie} />
+  if (moviesData.length > 0) {
+    contents = <MoviesList movies={moviesData} deleteMovie={deleteMovie} />;
   }
 
-  if(error){
-    contents = <p>{error} <button className="btn fw-bold">....Retrying</button> <br/><button className="btn fw-bold">Cancel</button></p>;
+  if (error) {
+    contents = (
+      <p>
+        {error} <button className="btn fw-bold">....Retrying</button> <br />
+        <button className="btn fw-bold">Cancel</button>
+      </p>
+    );
   }
 
-  if(isLoading) {
-    contents = <LoadingApp /> 
+  if (isLoading) {
+    contents = <LoadingApp />;
   }
 
   return (
     <React.Fragment>
       <section>
-      <AddMovie movies={addNewMovieHandler}/>
+        <AddMovie movies={addNewMovieHandler} />
       </section>
       <section>
-        <button className="btn-fetch" onClick={() => moviesDataHandler()}>Fetch Movies</button>
+        <button className="btn-fetch" onClick={() => fetchMoviesDataHandler()}>
+          Fetch Movies
+        </button>
       </section>
       <section>
         {contents}
-        
+
         {/* {!isLoading && moviesData.length > 0 && (
-          <MoviesList movies={moviesData} />
+          <MoviesList movies={moviesData} deleteMovie={deleteMovie}/>
         )}
         {!isLoading && moviesData.length === 0 && !error && <p>No data found</p>}
         {!isLoading && error && <p>{error}</p>}
